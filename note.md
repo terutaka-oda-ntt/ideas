@@ -224,3 +224,4 @@ flowchart LR
 ネットワーク分離：App/Subnet と DTL/Subnet を分離し、NSG と UDR でテスト用 VM の影響がアプリ側に波及しないように。
 
 
+
