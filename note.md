@@ -223,5 +223,9 @@ flowchart LR
 イメージ戦略：Shared Image Gallery にOS パッチ済み・ミドルウェア同梱イメージを置き、ADE/DTL のどちらからも参照。
 ネットワーク分離：App/Subnet と DTL/Subnet を分離し、NSG と UDR でテスト用 VM の影響がアプリ側に波及しないように。
 
+## セキュアドPC（端末暗号化）前提でのソフトウェア開発環境の在り方
+
+[詳細はこちら](./secure-pc-development-environment.md)
+
 
 
