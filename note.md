@@ -226,6 +226,3 @@ flowchart LR
 ## セキュアドPC（端末暗号化）前提でのソフトウェア開発環境の在り方
 
 [詳細はこちら](./secure-pc-development-environment.md)
-
-
-
