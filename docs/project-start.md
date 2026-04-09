@@ -67,6 +67,13 @@ pre-commit run --all-files
    gh pr create --base main
    ```
 
+## CIの自動実行（実装済み）
+
+CIは [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) で実装済みです。
+
+運用手順・ブランチ保護・権限チェックリストは
+[CI/CD 環境ガイド](ci-cd.md) を参照してください。
+
 ## テストの実行
 
 ```bash

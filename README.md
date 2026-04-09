@@ -41,6 +41,16 @@ pre-commit run --all-files
 
 テストカテゴリ：TC-01〜04（形式）、TC-05〜07（内容）、TC-08〜10（セキュリティ）、TC-11〜19（フック動作）
 
+## CI（実装済み）
+
+CIの実装は [`.github/workflows/ci.yml`](.github/workflows/ci.yml) で提供しています。
+
+運用手順・ブランチ保護・権限チェックリストの詳細は
+[CI/CD 環境ガイド](docs/ci-cd.md) を参照してください。
+
+ブランチ保護の自動適用スクリプトは
+[`scripts/apply_branch_protection.sh`](scripts/apply_branch_protection.sh) を利用します。
+
 ## リポジトリ構成
 
 ```

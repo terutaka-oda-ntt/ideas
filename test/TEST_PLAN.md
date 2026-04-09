@@ -89,7 +89,8 @@ python3 test/test_precommit_hooks.py
 
 - **ローカル開発時**: `pre-commit run --all-files` で全チェック実行
 - **コミット前**: 自動的にpre-commitフックが実行
-- **PR作成時**: GitHub Actionsで全テスト実行（予定）
+- **PR作成時（main/stage向け）**: GitHub Actions（`.github/workflows/ci.yml`）で全テスト実行
+- **main/stageへのpush時**: GitHub Actions（`.github/workflows/ci.yml`）で全テスト実行
 
 ## 合格基準
 
