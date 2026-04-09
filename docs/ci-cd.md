@@ -92,6 +92,8 @@ export GH_TOKEN=<repo admin token>
 
 #### 参考コマンド
 
+以下の確認コマンドは `jq` が必要です（未導入の場合は事前にインストールしてください）。
+
 ```bash
 # ブランチ保護を自動適用（管理者トークンが必要）
 export GH_TOKEN=<repo admin token>
