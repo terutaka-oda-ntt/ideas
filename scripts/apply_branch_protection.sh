@@ -16,9 +16,18 @@ if [[ -z "${GITHUB_TOKEN:-}" && -z "${GH_TOKEN:-}" ]]; then
 fi
 
 # Derive owner/repo from the current repository remote; allow overrides via OWNER/REPO env vars
-_REPO_SLUG="$(gh repo view --json nameWithOwner -q .nameWithOwner)"
-OWNER="${OWNER:-${_REPO_SLUG%%/*}}"
-REPO="${REPO:-${_REPO_SLUG#*/}}"
+if [[ -z "${OWNER:-}" || -z "${REPO:-}" ]]; then
+  if ! _REPO_SLUG="$(gh repo view --json nameWithOwner -q .nameWithOwner 2>/dev/null)" || [[ -z "${_REPO_SLUG}" ]]; then
+    echo "Could not determine repository. Run from within a cloned repository or set OWNER and REPO env vars." >&2
+    exit 1
+  fi
+  if [[ "${_REPO_SLUG}" != */* ]]; then
+    echo "Unexpected repository format '${_REPO_SLUG}'. Expected 'owner/repo'." >&2
+    exit 1
+  fi
+  OWNER="${OWNER:-${_REPO_SLUG%%/*}}"
+  REPO="${REPO:-${_REPO_SLUG#*/}}"
+fi
 
 for BRANCH in main stage; do
   echo "Applying protection to ${BRANCH}..."
