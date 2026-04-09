@@ -13,7 +13,7 @@ if ! command -v gh >/dev/null 2>&1; then
 fi
 
 if [[ -z "${GITHUB_TOKEN:-}" && -z "${GH_TOKEN:-}" ]]; then
-  echo "Set GITHUB_TOKEN or GH_TOKEN with admin:repo_hook / repo scope before running." >&2
+  echo "Set GITHUB_TOKEN or GH_TOKEN before running. For branch protection updates, use a classic PAT with repo scope and repository admin rights, or a fine-grained PAT with Administration: Read and write for this repository." >&2
   exit 1
 fi
 
