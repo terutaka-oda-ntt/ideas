@@ -20,6 +20,11 @@ TOTAL_TESTS=0
 PASSED_TESTS=0
 FAILED_TESTS=0
 TEST_RESULTS=""
+TAP_RESULTS=""
+TAP_DIAGNOSTICS=""
+TEST_OUTPUT_FILE="/tmp/run_tests_output_$$.log"
+RESULTS_DIR="$TEST_DIR/results"
+TAP_OUTPUT_FILE="$RESULTS_DIR/run_tests.tap"
 
 echo "=================================="
 echo "テスト実行開始"
@@ -36,16 +41,28 @@ run_test() {
     TOTAL_TESTS=$((TOTAL_TESTS + 1))
     echo -e "${BLUE}[テスト $TOTAL_TESTS] $test_name${NC}"
 
-    python3 "$test_script" 2>&1 | tee /tmp/test_output.txt
+    # set -e を維持しつつ、失敗テストでも集計継続する
+    set +e
+    python3 "$test_script" 2>&1 | tee "$TEST_OUTPUT_FILE"
     local test_exit=${PIPESTATUS[0]}
+    set -e
 
     if [ $test_exit -eq 0 ]; then
         PASSED_TESTS=$((PASSED_TESTS + 1))
         TEST_RESULTS="$TEST_RESULTS\n${GREEN}✓${NC} $test_name"
+        TAP_RESULTS="$TAP_RESULTS\nok $TOTAL_TESTS - $test_name"
         echo -e "${GREEN}✓ 成功${NC}\n"
     else
         FAILED_TESTS=$((FAILED_TESTS + 1))
         TEST_RESULTS="$TEST_RESULTS\n${RED}✗${NC} $test_name"
+        TAP_RESULTS="$TAP_RESULTS\nnot ok $TOTAL_TESTS - $test_name"
+        if [ -f "$TEST_OUTPUT_FILE" ]; then
+            local failure_excerpt
+            failure_excerpt=$(tail -n 5 "$TEST_OUTPUT_FILE" | sed 's/\x1b\[[0-9;]*m//g' | sed 's/^/# /')
+            TAP_DIAGNOSTICS="$TAP_DIAGNOSTICS\n# --- $test_name (exit=$test_exit) ---\n$failure_excerpt"
+        else
+            TAP_DIAGNOSTICS="$TAP_DIAGNOSTICS\n# --- $test_name (exit=$test_exit) ---"
+        fi
         echo -e "${RED}✗ 失敗${NC}\n"
     fi
 }
@@ -80,6 +97,23 @@ echo ""
 echo -e "テスト結果:"
 echo -e "$TEST_RESULTS"
 echo ""
+
+# TAPレポートの出力（機械可読）
+mkdir -p "$RESULTS_DIR"
+{
+    echo "TAP version 13"
+    echo "1..$TOTAL_TESTS"
+    echo -e "$TAP_RESULTS" | sed '/^$/d'
+
+    if [ $FAILED_TESTS -gt 0 ]; then
+        echo "# Failed tests: $FAILED_TESTS"
+        echo -e "$TAP_DIAGNOSTICS" | sed '/^$/d'
+    fi
+} > "$TAP_OUTPUT_FILE"
+echo "TAPレポート出力: $TAP_OUTPUT_FILE"
+echo ""
+
+rm -f "$TEST_OUTPUT_FILE"
 
 # 終了コード
 if [ $FAILED_TESTS -eq 0 ]; then

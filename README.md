@@ -2,6 +2,9 @@
 
 CI/CD・安全な開発環境に関するドキュメンテーションリポジトリです。
 
+このリポジトリは Python アプリケーションの配布・実行を目的としたプロジェクトではありません。
+Python は `test/` 配下のテストハーネス実行と CI 検証のためにのみ利用します。
+
 ## ドキュメント
 
 | ドキュメント | 内容 |
@@ -16,7 +19,7 @@ CI/CD・安全な開発環境に関するドキュメンテーションリポジ
 ```bash
 git clone https://github.com/terutaka-oda-ntt/ideas.git
 cd ideas
-pip install pre-commit
+pip install -r requirements-ci.txt
 pre-commit install
 ./test/run_tests.sh
 ```
@@ -41,6 +44,16 @@ pre-commit run --all-files
 
 テストカテゴリ：TC-01〜04（形式）、TC-05〜07（内容）、TC-08〜10（セキュリティ）、TC-11〜19（フック動作）
 
+## CI（実装済み）
+
+CIの実装は [`.github/workflows/ci.yml`](.github/workflows/ci.yml) で提供しています。
+
+運用手順・ブランチ保護・権限チェックリストの詳細は
+[CI/CD 環境ガイド](docs/ci-cd.md) を参照してください。
+
+ブランチ保護の自動適用スクリプトは
+[`scripts/apply_branch_protection.sh`](scripts/apply_branch_protection.sh) を利用します。
+
 ## リポジトリ構成
 
 ```
@@ -51,6 +64,7 @@ pre-commit run --all-files
 │   └── project-start.md       # プロジェクト開始ガイド
 ├── .pre-commit-config.yaml    # Pre-commit設定
 ├── .secrets.baseline          # detect-secretsベースライン
+├── requirements-ci.txt        # CI/テストハーネス専用依存
 ├── .gitignore                 # Git除外設定
 └── test/
     ├── TEST_PLAN.md           # テスト計画（TC-01〜TC-19）
