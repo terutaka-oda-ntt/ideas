@@ -1,0 +1,6 @@
+# CI/test harness dependencies for this repository.
+# This repository is documentation-first and is not a Python application package.
+pre-commit
+detect-secrets
+pyyaml
+markdown
