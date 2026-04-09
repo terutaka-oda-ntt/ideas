@@ -38,3 +38,11 @@ jobs:
 
       - name: Run repository tests
         run: ./test/run_tests.sh
+
+      - name: Upload TAP results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tap-results
+          path: test/results/run_tests.tap
+          retention-days: 30

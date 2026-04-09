@@ -1,1 +1,2 @@
 .secrets.baseline
+test/results/*.tap
