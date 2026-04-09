@@ -3,8 +3,6 @@
 
 set -euo pipefail
 
-OWNER="terutaka-oda-ntt"
-REPO="ideas"
 REQUIRED_CONTEXT="quality-and-security"
 
 if ! command -v gh >/dev/null 2>&1; then
@@ -16,6 +14,11 @@ if [[ -z "${GITHUB_TOKEN:-}" && -z "${GH_TOKEN:-}" ]]; then
   echo "Set GITHUB_TOKEN or GH_TOKEN before running. For branch protection updates, use a classic PAT with repo scope and repository admin rights, or a fine-grained PAT with Administration: Read and write for this repository." >&2
   exit 1
 fi
+
+# Derive owner/repo from the current repository remote; allow overrides via OWNER/REPO env vars
+_REPO_SLUG="$(gh repo view --json nameWithOwner -q .nameWithOwner)"
+OWNER="${OWNER:-${_REPO_SLUG%%/*}}"
+REPO="${REPO:-${_REPO_SLUG#*/}}"
 
 for BRANCH in main stage; do
   echo "Applying protection to ${BRANCH}..."
