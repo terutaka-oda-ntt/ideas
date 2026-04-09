@@ -75,7 +75,7 @@ export GH_TOKEN=<repo admin token>
 
 - Branch protection が有効
 - `Require a pull request before merging` が有効
-- `Required approving reviews` が 1 以上
+- `Required approving reviews` が 0（ソロ開発運用）
 - `Require status checks to pass before merging` が有効
 - 必須チェックに `quality-and-security` が含まれる
 - `Include administrators` が有効
