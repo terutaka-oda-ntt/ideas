@@ -26,6 +26,7 @@ class PreCommitHookTester:
         self.passed_tests = []
         self.failed_tests = []
         self.original_dir = os.getcwd()
+        self.repo_root = Path(__file__).resolve().parent.parent
 
     def setup(self):
         """テスト用の一時的なgitリポジトリを作成"""
@@ -40,15 +41,25 @@ class PreCommitHookTester:
         subprocess.run(["git", "config", "user.email", "test@example.com"], capture_output=True, check=True)
         subprocess.run(["git", "config", "user.name", "Test User"], capture_output=True, check=True)
 
-        # 親ディレクトリの.pre-commit-config.yamlをコピー
-        parent_config = Path(self.original_dir) / ".pre-commit-config.yaml"
+        # リポジトリルートから pre-commit 設定をコピー
+        parent_config = self.repo_root / ".pre-commit-config.yaml"
         if parent_config.exists():
             shutil.copy(parent_config, ".pre-commit-config.yaml")
             print("✓ pre-commit設定をコピー")
 
-            # 初期コミットを作成（.pre-commit-config.yamlをコミット）
-            subprocess.run(["git", "add", ".pre-commit-config.yaml"], capture_output=True)
-            subprocess.run(["git", "commit", "-m", "Initial commit with pre-commit config"], capture_output=True)
+        # detect-secrets の baseline をコピー
+        parent_baseline = self.repo_root / ".secrets.baseline"
+        if parent_baseline.exists():
+            shutil.copy(parent_baseline, ".secrets.baseline")
+            print("✓ detect-secrets baselineをコピー")
+
+        # 初期コミットを作成（設定ファイルを追跡対象にする）
+        files_for_initial_commit = [".pre-commit-config.yaml"]
+        if Path(".secrets.baseline").exists():
+            files_for_initial_commit.append(".secrets.baseline")
+
+        subprocess.run(["git", "add", *files_for_initial_commit], capture_output=True)
+        subprocess.run(["git", "commit", "-m", "Initial commit with pre-commit config"], capture_output=True)
 
         # pre-commitをインストール
         result = subprocess.run(["pre-commit", "install"], capture_output=True)
@@ -88,9 +99,8 @@ class PreCommitHookTester:
                 text=True
             )
 
-            # 修正が必要な場合は、修正後に再度コミット試行
-            if result.returncode != 0 and "hook" in result.stdout.lower():
-                # ファイルが修正されたか確認
+            # フックがファイルを修正した場合は再ステージして再コミット
+            if result.returncode != 0:
                 git_status = subprocess.run(
                     ["git", "status", "--porcelain"],
                     capture_output=True,
@@ -252,6 +262,26 @@ class PreCommitHookTester:
 
         self.run_test("TC-17: 大容量ファイル検出", setup, should_fail=True)
 
+    def test_db_connection_secret_detection(self):
+        """TC-18: DB接続文字列（認証情報入り）検出テスト"""
+        def setup():
+            Path("db_config.env").write_text(
+                "DATABASE_URL='postgresql://dbadmin:SuperSecretP@ssw0rd@db.example.local:5432/prod_db'\n"
+            )
+            Path("README.md").write_text("# Test")
+
+        self.run_test("TC-18: DB接続文字列検出", setup, should_fail=True)
+
+    def test_login_credentials_detection(self):
+        """TC-19: ログイン情報（username/password）検出テスト"""
+        def setup():
+            Path("credentials.yaml").write_text(
+                "username: service-admin\npassword: 'UltraSecretLoginPass123!'\n"
+            )
+            Path("README.md").write_text("# Test")
+
+        self.run_test("TC-19: ログイン情報検出", setup, should_fail=True)
+
     def run_all_tests(self):
         """すべてのテストを実行"""
         print("\n" + "=" * 60)
@@ -270,6 +300,8 @@ class PreCommitHookTester:
             self.test_normal_file_commit()
             self.test_invalid_yaml()
             self.test_large_file_detection()
+            self.test_db_connection_secret_detection()
+            self.test_login_credentials_detection()
 
             print("\n--- テスト結果 ---")
             print(f"\n✓ 成功: {len(self.passed_tests)}")
