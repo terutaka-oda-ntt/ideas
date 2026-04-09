@@ -10,7 +10,7 @@ from pathlib import Path
 def check_markdown_files():
     """Markdownファイルの基本的な形式をチェック"""
     root_dir = Path(__file__).parent.parent
-    markdown_files = root_dir.glob("*.md")
+    markdown_files = list(root_dir.glob("*.md")) + list(root_dir.glob("docs/*.md"))
 
     errors = []
     passed = 0
@@ -49,8 +49,8 @@ def check_markdown_files():
                 passed += 1
 
             # TC-06: セクション確認（重要ファイル向け）
-            if md_file.name == "devops_environment.md":
-                sections = ["CIのトリガ", "CIのプロセス", "CDのプロセス"]
+            if md_file.name == "ci-cd.md":
+                sections = ["トリガ", "CIのプロセス", "CDのプロセス"]
                 for section in sections:
                     if section not in content:
                         errors.append(f"[TC-06] {md_file.name}: セクション '{section}' が見つかりません")

@@ -1,132 +1,63 @@
 # ideas リポジトリ
 
-CIとCD、安全な開発環境に関するドキュメンテーションリポジトリです。
+CI/CD・安全な開発環境に関するドキュメンテーションリポジトリです。
 
-## 📋 リポジトリ構成
+## ドキュメント
+
+| ドキュメント | 内容 |
+|---|---|
+| [プロジェクト開始ガイド](docs/project-start.md) | 初回セットアップから日常ワークフローまで |
+| [開発環境セットアップ](docs/dev-environment.md) | pre-commit・detect-secrets の設定と運用 |
+| [CI/CD 環境ガイド](docs/ci-cd.md) | CI/CDの概念・Azure インフラ構成 |
+| [テスト計画](test/TEST_PLAN.md) | テストケース一覧（TC-01〜TC-19） |
+
+## クイックスタート
+
+```bash
+git clone https://github.com/terutaka-oda-ntt/ideas.git
+cd ideas
+pip install pre-commit
+pre-commit install
+./test/run_tests.sh
+```
+
+## セキュリティ機能
+
+- **detect-private-key**: 秘密鍵の自動検出
+- **detect-secrets**: APIキー・DB接続情報・認証情報の自動検出
+- **check-yaml / check-added-large-files**: 形式・サイズの検証
+
+詳細は [docs/dev-environment.md](docs/dev-environment.md) を参照してください。
+
+## テスト
+
+```bash
+# 全テスト実行
+./test/run_tests.sh
+
+# pre-commitの手動実行
+pre-commit run --all-files
+```
+
+テストカテゴリ：TC-01〜04（形式）、TC-05〜07（内容）、TC-08〜10（セキュリティ）、TC-11〜19（フック動作）
+
+## リポジトリ構成
 
 ```
 /
-├── devops_environment.md          # CI/CD環境の定義・プロセス
-├── project-start-guid.md          # プロジェクト開始ガイド
-├── secure-pc-development-environment.md  # 安全なPC開発環境
-├── note.md                        # 開発ノート
-├── PRE_COMMIT_SETUP.md           # Pre-commitセットアップガイド
-├── .pre-commit-config.yaml       # Pre-commit設定（シークレット検出）
-├── .gitignore                    # Git除外設定
-└── test/                         # テストスイート
-    ├── TEST_PLAN.md              # テスト計画（TC-01～TC-17）
-    ├── run_tests.sh              # 統合テスト実行スクリプト
-    ├── test_structure.py         # ファイル構造チェック（TC-05～TC-07）
-    ├── test_yaml.py              # YAML形式チェック（TC-02）
-    ├── test_markdown.py          # Markdown形式チェック（TC-01, TC-03, TC-04）
-    ├── test_security.py          # セキュリティチェック（TC-08～TC-10）
-    └── test_precommit_hooks.py   # Pre-commitフック動作確認（TC-11～TC-17）
+├── docs/
+│   ├── ci-cd.md               # CI/CD概念・Azureインフラ構成
+│   ├── dev-environment.md     # pre-commit・detect-secrets設定と運用
+│   └── project-start.md       # プロジェクト開始ガイド
+├── .pre-commit-config.yaml    # Pre-commit設定
+├── .secrets.baseline          # detect-secretsベースライン
+├── .gitignore                 # Git除外設定
+└── test/
+    ├── TEST_PLAN.md           # テスト計画（TC-01〜TC-19）
+    ├── run_tests.sh           # 統合テスト実行スクリプト
+    ├── test_structure.py
+    ├── test_yaml.py
+    ├── test_markdown.py
+    ├── test_security.py
+    └── test_precommit_hooks.py
 ```
-
-## 🔒 セキュリティ機能
-
-- **Pre-commit フレームワーク**: コミット前に自動チェック
-- **秘密検出**: 秘密鍵やAPIキーの自動検出・防止
-- **形式チェック**: YAML、Markdown形式の検証
-- **.gitignore**: 機密ファイルの自動除外
-
-詳細は [PRE_COMMIT_SETUP.md](PRE_COMMIT_SETUP.md) を参照してください。
-
-## ✅ テスト
-
-### 全テスト実行
-
-```bash
-./test/run_tests.sh
-```
-
-### 個別テスト実行
-
-```bash
-# ファイル構造チェック
-python3 test/test_structure.py
-
-# YAML形式チェック
-python3 test/test_yaml.py
-
-# Markdown形式チェック
-python3 test/test_markdown.py
-
-# セキュリティチェック
-python3 test/test_security.py
-
-# Pre-commitフック動作確認（TC-11～TC-17）
-python3 test/test_precommit_hooks.py
-```
-
-### テスト カテゴリ
-
-- **TC-01～04**: ファイル形式チェック（Markdown、YAML、末尾チェック）
-- **TC-05～07**: 内容チェック（ファイル存在、セクション、リンク形式）
-- **TC-08～10**: セキュリティチェック（秘密検出、.gitignore確認）
-- **TC-11～17**: Pre-commitフック動作確認（秘密検出、形式修正、大容量ファイル）
-
-詳細は [test/TEST_PLAN.md](test/TEST_PLAN.md) 参照。
-
-## 📝 使用方法
-
-### 開発ワークフロー
-
-1. **ドキュメント編集**
-   ```bash
-   # ファイルを編集
-   vim devops_environment.md
-   ```
-
-2. **テスト実行**（コミット前）
-   ```bash
-   ./test/run_tests.sh
-   ```
-
-3. **コミット** （pre-commitが自動実行）
-   ```bash
-   git add .
-   git commit -m "Update documentation"
-   ```
-
-### トラブル
-
-**Q: pre-commitをバイパスしたい**
-```bash
-git commit --no-verify
-```
-
-**Q: チェックが失敗した**
-
-pre-commitが変更を自動修正している場合があります：
-```bash
-git add .
-git commit -m "message"
-```
-
-## 📚 主要ドキュメント
-
-- [CI/CD環境の定義](devops_environment.md)
-- [Pre-commitセットアップガイド](PRE_COMMIT_SETUP.md)
-- [テスト計画](test/TEST_PLAN.md)
-- [安全なPC開発環境](secure-pc-development-environment.md)
-
-## 🛠 セットアップ
-
-### 初回セットアップ
-
-```bash
-# Pre-commit インストール
-pip install pre-commit
-
-# Git hook登録
-pre-commit install
-
-# テスト実行
-./test/run_tests.sh
-```
-
-### 依存パッケージ
-
-- `pre-commit`: Git hook管理
-- `pyyaml`: YAML解析（テスト実行時に自動インストール）

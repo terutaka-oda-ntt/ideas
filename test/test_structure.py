@@ -34,8 +34,9 @@ def check_file_structure():
 
     # ドキュメントファイルの存在
     doc_files = {
-        "devops_environment.md": "DevOps環境ドキュメント",
-        "PRE_COMMIT_SETUP.md": "Pre-commit セットアップガイド",
+        "docs/ci-cd.md": "CI/CD環境ドキュメント",
+        "docs/dev-environment.md": "開発環境セットアップガイド",
+        "docs/project-start.md": "プロジェクト開始ガイド",
     }
 
     print("\nドキュメントファイルをチェック中...")
