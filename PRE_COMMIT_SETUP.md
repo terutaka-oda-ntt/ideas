@@ -7,6 +7,7 @@
 ### インストール済みのツール
 - **pre-commit**: Gitコミット前に自動チェック
 - **detect-private-key**: 秘密鍵の検出
+- **detect-secrets**: APIキー・DB接続情報・認証情報などの検出
 - **trailing-whitespace**: コードの末尾の空白削除
 - **end-of-file-fixer**: ファイルの末尾の改行修正
 - **check-yaml**: YAML形式の検証
@@ -37,6 +38,7 @@ git commit -m "commit message"
 
 **チェック内容:**
 - ✅ 秘密鍵が含まれていないか確認
+- ✅ APIキー・DB接続文字列・ログイン情報などの検出
 - ✅ YAMLファイルの形式チェック
 - ✅ 大きなファイルの誤コミット確認
 - ✅ コード形式の修正（末尾空白など）
@@ -52,6 +54,16 @@ Aborting commit. Found private key: path/to/file
 1. ファイルから秘密情報を削除
 2. または `.gitignore` に追加
 3. ファイルを再度ステージしてコミット
+
+#### detect-secrets が検出した場合
+```
+ERROR: Potential secrets about to be committed to git repo!
+```
+
+対処法：
+1. 実際の秘密情報なら値を削除し、環境変数やシークレット管理に移動
+2. サンプル値など許容対象なら `.secrets.baseline` を更新
+3. 再度 `pre-commit run --all-files` で確認後にコミット
 
 #### 形式ミスが検出された場合
 ```
@@ -90,6 +102,15 @@ pre-commit autoupdate
 ```bash
 detect-secrets scan --baseline .secrets.baseline
 ```
+
+更新内容を確認する場合：
+```bash
+git diff .secrets.baseline
+```
+
+定常運用の推奨：
+- フック更新時（`pre-commit autoupdate` 後）に baseline の差分をレビュー
+- `.secrets.baseline` の変更は理由をPR本文に明記
 
 ## よくあるトラブル
 

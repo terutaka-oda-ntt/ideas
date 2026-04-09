@@ -2,7 +2,7 @@
 # テスト実行スクリプト
 # 全テストを順序立てて実行し、結果をレポート
 
-set -e
+set -euo pipefail
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 TEST_DIR="$SCRIPT_DIR"
@@ -36,7 +36,10 @@ run_test() {
     TOTAL_TESTS=$((TOTAL_TESTS + 1))
     echo -e "${BLUE}[テスト $TOTAL_TESTS] $test_name${NC}"
 
-    if python3 "$test_script" 2>&1 | tee /tmp/test_output.txt; then
+    python3 "$test_script" 2>&1 | tee /tmp/test_output.txt
+    local test_exit=${PIPESTATUS[0]}
+
+    if [ $test_exit -eq 0 ]; then
         PASSED_TESTS=$((PASSED_TESTS + 1))
         TEST_RESULTS="$TEST_RESULTS\n${GREEN}✓${NC} $test_name"
         echo -e "${GREEN}✓ 成功${NC}\n"
@@ -62,7 +65,7 @@ run_test "ファイル構造チェック" "$TEST_DIR/test_structure.py"
 run_test "YAML形式チェック" "$TEST_DIR/test_yaml.py"
 run_test "Markdown形式チェック" "$TEST_DIR/test_markdown.py"
 run_test "セキュリティチェック" "$TEST_DIR/test_security.py"
-run_test "Pre-commitフック動作確認（TC-11～TC-17）" "$TEST_DIR/test_precommit_hooks.py"
+run_test "Pre-commitフック動作確認（TC-11～TC-19）" "$TEST_DIR/test_precommit_hooks.py"
 
 # テスト結果のサマリー
 echo "=================================="

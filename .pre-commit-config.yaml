@@ -9,3 +9,12 @@ repos:
       - id: check-added-large-files
         args: ['--maxkb=1000']
       - id: detect-private-key  # 秘密鍵検出
+
+  # detect-secrets: APIキー/パスワード/認証情報などの検出
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args:
+          - --baseline
+          - .secrets.baseline
