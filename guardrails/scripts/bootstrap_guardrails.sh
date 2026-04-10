@@ -6,7 +6,7 @@ set -euo pipefail
 usage() {
   cat <<'EOF'
 Usage:
-  ./scripts/bootstrap_guardrails.sh --template-dir <path> [--target-dir <path>] [--with-docs] [--force] [--dry-run]
+  ./guardrails/scripts/bootstrap_guardrails.sh --template-dir <path> [--target-dir <path>] [--with-docs] [--force] [--dry-run]
 
 Options:
   --template-dir <path>  Path to the template repository (required)
@@ -17,9 +17,9 @@ Options:
   -h, --help             Show this help
 
 Examples:
-  ./scripts/bootstrap_guardrails.sh --template-dir /path/to/ideas --target-dir .
-  ./scripts/bootstrap_guardrails.sh --template-dir /path/to/ideas --target-dir . --with-docs --force
-  ./scripts/bootstrap_guardrails.sh --template-dir /path/to/ideas --target-dir . --dry-run
+  ./guardrails/scripts/bootstrap_guardrails.sh --template-dir /path/to/ideas --target-dir .
+  ./guardrails/scripts/bootstrap_guardrails.sh --template-dir /path/to/ideas --target-dir . --with-docs --force
+  ./guardrails/scripts/bootstrap_guardrails.sh --template-dir /path/to/ideas --target-dir . --dry-run
 EOF
 }
 
@@ -96,7 +96,7 @@ required_template_files=(
   ".guardrails-config.yaml"
   "requirements-ci.txt"
   ".github/workflows/ci.yml"
-  "scripts/apply_branch_protection.sh"
+  "guardrails/scripts/apply_branch_protection.sh"
   "guardrails/test/run_tests.sh"
 )
 
@@ -161,11 +161,11 @@ copy_file ".secrets.baseline"
 copy_file ".guardrails-config.yaml"
 copy_file "requirements-ci.txt"
 copy_file ".github/workflows/ci.yml"
-copy_file "scripts/apply_branch_protection.sh"
+copy_file "guardrails/scripts/apply_branch_protection.sh"
 
 # Also copy this bootstrap script for future updates if available.
-if [[ -f "$TEMPLATE_DIR/scripts/bootstrap_guardrails.sh" ]]; then
-  copy_file "scripts/bootstrap_guardrails.sh"
+if [[ -f "$TEMPLATE_DIR/guardrails/scripts/bootstrap_guardrails.sh" ]]; then
+  copy_file "guardrails/scripts/bootstrap_guardrails.sh"
 fi
 
 copy_tree_contents "guardrails/test"
@@ -178,11 +178,11 @@ if [[ $WITH_DOCS -eq 1 ]]; then
   fi
 fi
 
-if [[ -f "$TARGET_DIR/scripts/apply_branch_protection.sh" ]]; then
-  run_cmd chmod +x "$TARGET_DIR/scripts/apply_branch_protection.sh"
+if [[ -f "$TARGET_DIR/guardrails/scripts/apply_branch_protection.sh" ]]; then
+  run_cmd chmod +x "$TARGET_DIR/guardrails/scripts/apply_branch_protection.sh"
 fi
-if [[ -f "$TARGET_DIR/scripts/bootstrap_guardrails.sh" ]]; then
-  run_cmd chmod +x "$TARGET_DIR/scripts/bootstrap_guardrails.sh"
+if [[ -f "$TARGET_DIR/guardrails/scripts/bootstrap_guardrails.sh" ]]; then
+  run_cmd chmod +x "$TARGET_DIR/guardrails/scripts/bootstrap_guardrails.sh"
 fi
 if [[ -f "$TARGET_DIR/guardrails/test/run_tests.sh" ]]; then
   run_cmd chmod +x "$TARGET_DIR/guardrails/test/run_tests.sh"
@@ -195,8 +195,9 @@ if [[ $DRY_RUN -eq 1 ]]; then
 else
   echo "Bootstrap completed. Next steps:"
 fi
-echo "1) pip install -r requirements-ci.txt"
-echo "2) pre-commit install"
-echo "3) detect-secrets scan --baseline .secrets.baseline"
-echo "4) pre-commit run --all-files"
-echo "5) ./guardrails/test/run_tests.sh"
+echo "1) python3 -m venv guardrails/.venv && source guardrails/.venv/bin/activate"
+echo "2) pip install -r requirements-ci.txt"
+echo "3) pre-commit install"
+echo "4) detect-secrets scan --baseline .secrets.baseline"
+echo "5) pre-commit run --all-files"
+echo "6) ./guardrails/test/run_tests.sh"

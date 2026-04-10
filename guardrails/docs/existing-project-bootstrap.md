@@ -27,7 +27,7 @@
 - `.guardrails-config.yaml`
 - `requirements-ci.txt`
 - `.github/workflows/ci.yml`
-- `scripts/apply_branch_protection.sh`
+- `guardrails/scripts/apply_branch_protection.sh`
 - `guardrails/test/`
 
 `README.md` や既存の `docs/` は上書きせず、必要な説明だけ追加します。
@@ -46,19 +46,19 @@ git checkout -b chore/bootstrap-guardrails
 
 ```bash
 # 既存リポジトリ側で実行
-./scripts/bootstrap_guardrails.sh --template-dir /path/to/ideas --target-dir .
+./guardrails/scripts/bootstrap_guardrails.sh --template-dir /path/to/ideas --target-dir .
 ```
 
 先に変更予定だけ確認したい場合:
 
 ```bash
-./scripts/bootstrap_guardrails.sh --template-dir /path/to/ideas --target-dir . --dry-run
+./guardrails/scripts/bootstrap_guardrails.sh --template-dir /path/to/ideas --target-dir . --dry-run
 ```
 
 `guardrails/docs/` も取り込みたい場合:
 
 ```bash
-./scripts/bootstrap_guardrails.sh --template-dir /path/to/ideas --target-dir . --with-docs
+./guardrails/scripts/bootstrap_guardrails.sh --template-dir /path/to/ideas --target-dir . --with-docs
 ```
 
 既存ファイルを上書きする場合のみ `--force` を使います。
@@ -70,13 +70,13 @@ git checkout -b chore/bootstrap-guardrails
 ```bash
 TEMPLATE_DIR=/path/to/ideas
 
-mkdir -p .github/workflows scripts guardrails/test
+mkdir -p .github/workflows guardrails/scripts guardrails/test
 cp "$TEMPLATE_DIR/.pre-commit-config.yaml" .
 cp "$TEMPLATE_DIR/.secrets.baseline" .
 cp "$TEMPLATE_DIR/.guardrails-config.yaml" .
 cp "$TEMPLATE_DIR/requirements-ci.txt" .
 cp "$TEMPLATE_DIR/.github/workflows/ci.yml" .github/workflows/ci.yml
-cp "$TEMPLATE_DIR/scripts/apply_branch_protection.sh" scripts/apply_branch_protection.sh
+cp "$TEMPLATE_DIR/guardrails/scripts/apply_branch_protection.sh" guardrails/scripts/apply_branch_protection.sh
 cp -r "$TEMPLATE_DIR/guardrails/test/." guardrails/test/
 ```
 
@@ -157,7 +157,7 @@ PR に含める内容は、原則として次に限定します。
 export GH_TOKEN=<repo admin token>
 export REQUIRED_CONTEXTS="quality-and-security"
 export PROTECTED_BRANCHES="main"
-./scripts/apply_branch_protection.sh
+./guardrails/scripts/apply_branch_protection.sh
 ```
 
 `stage` や `release` を守る場合は `PROTECTED_BRANCHES` に追加します。
