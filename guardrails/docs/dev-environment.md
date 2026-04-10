@@ -19,6 +19,7 @@
 ```
 .pre-commit-config.yaml    # Pre-commit設定ファイル
 .secrets.baseline          # detect-secretsのベースラインファイル
+.guardrails-config.yaml    # テンプレート利用時の検証設定
 .gitignore                 # 機密ファイルの除外設定
 ```
 
@@ -31,6 +32,8 @@ pip install pre-commit
 pre-commit install
 detect-secrets scan --baseline .secrets.baseline
 ```
+
+`.secrets.baseline` は `.gitignore` に入れず、リポジトリで追跡します。
 
 ### 2. コミット時の動作
 
@@ -123,6 +126,7 @@ git diff .secrets.baseline
 
 - `pre-commit autoupdate` 実行後は baseline の差分をレビューする
 - `.secrets.baseline` の変更はPR本文に理由を明記する
+- テンプレート利用先では `.guardrails-config.yaml` をプロジェクト構成に合わせて更新する
 
 ## GitHub Codespaces の設定
 

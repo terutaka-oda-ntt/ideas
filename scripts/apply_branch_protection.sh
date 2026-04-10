@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-# Apply branch protection for main/stage with required CI check.
+# Apply branch protection for configured branches with required CI checks.
 
 set -euo pipefail
 
-REQUIRED_CONTEXT="quality-and-security"
+REQUIRED_CONTEXTS="${REQUIRED_CONTEXTS:-quality-and-security}"
+PROTECTED_BRANCHES="${PROTECTED_BRANCHES:-main,stage}"
 
 if ! command -v gh >/dev/null 2>&1; then
   echo "gh CLI is required." >&2
@@ -29,7 +30,26 @@ if [[ -z "${OWNER:-}" || -z "${REPO:-}" ]]; then
   REPO="${REPO:-${_REPO_SLUG#*/}}"
 fi
 
-for BRANCH in main stage; do
+IFS=',' read -r -a BRANCHES <<< "${PROTECTED_BRANCHES}"
+IFS=',' read -r -a CONTEXTS <<< "${REQUIRED_CONTEXTS}"
+
+if [[ ${#BRANCHES[@]} -eq 0 || -z "${BRANCHES[0]}" ]]; then
+  echo "Set PROTECTED_BRANCHES to a comma-separated list of branch names." >&2
+  exit 1
+fi
+
+if [[ ${#CONTEXTS[@]} -eq 0 || -z "${CONTEXTS[0]}" ]]; then
+  echo "Set REQUIRED_CONTEXTS to a comma-separated list of status check names." >&2
+  exit 1
+fi
+
+CONTEXTS_JSON="$(printf '%s\n' "${CONTEXTS[@]}" | sed '/^$/d' | sed 's/^/    "/; s/$/"/' | paste -sd ',\n' -)"
+
+for BRANCH in "${BRANCHES[@]}"; do
+  BRANCH="$(echo "${BRANCH}" | xargs)"
+  if [[ -z "${BRANCH}" ]]; then
+    continue
+  fi
   echo "Applying protection to ${BRANCH}..."
   gh api \
     --method PUT \
@@ -39,7 +59,7 @@ for BRANCH in main stage; do
   "required_status_checks": {
     "strict": true,
     "contexts": [
-      "${REQUIRED_CONTEXT}"
+${CONTEXTS_JSON}
     ]
   },
   "enforce_admins": true,
@@ -63,4 +83,4 @@ JSON
   gh api "repos/${OWNER}/${REPO}/branches/${BRANCH}" --jq '"- " + .name + " protected=" + (.protected|tostring)'
 done
 
-echo "Done. Confirm in GitHub settings: required status check '${REQUIRED_CONTEXT}'."
+echo "Done. Confirm in GitHub settings: required status checks '${REQUIRED_CONTEXTS}'."

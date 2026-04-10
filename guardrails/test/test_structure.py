@@ -5,9 +5,39 @@
 import sys
 from pathlib import Path
 
+try:
+    import yaml
+except ImportError:
+    print("Error: pyyaml がインストールされていません")
+    print("インストール: pip install -r requirements-ci.txt")
+    sys.exit(1)
+
+
+def load_guardrail_config(root_dir):
+    """構造テストの設定を読み込む"""
+    config_path = root_dir / ".guardrails-config.yaml"
+    if not config_path.exists():
+        return {
+            "required_files": [".pre-commit-config.yaml", ".gitignore"],
+            "optional_docs": [
+                "guardrails/docs/ci-cd.md",
+                "guardrails/docs/dev-environment.md",
+                "guardrails/docs/project-start.md",
+            ],
+        }
+
+    with config_path.open(encoding="utf-8") as config_file:
+        data = yaml.safe_load(config_file) or {}
+
+    return {
+        "required_files": data.get("required_files", []),
+        "optional_docs": data.get("optional_docs", []),
+    }
+
 def check_file_structure():
     """ファイル構造と必須ファイルをチェック"""
-    root_dir = Path(__file__).parent.parent
+    root_dir = Path(__file__).resolve().parent.parent.parent
+    config = load_guardrail_config(root_dir)
     errors = []
     passed = 0
 
@@ -16,9 +46,13 @@ def check_file_structure():
         "README.md": "リポジトリルートファイル",
         ".pre-commit-config.yaml": "pre-commit設定",
         ".gitignore": "Git除外ファイル",
+        ".guardrails-config.yaml": "ガードレール検証設定",
     }
 
     print("必須ファイルをチェック中...")
+    for filename in config["required_files"]:
+        required_files.setdefault(filename, "テンプレート利用側で定義された必須ファイル")
+
     for filename, description in required_files.items():
         file_path = root_dir / filename
 
@@ -34,12 +68,15 @@ def check_file_structure():
 
     # ドキュメントファイルの存在
     doc_files = {
-        "docs/ci-cd.md": "CI/CD環境ドキュメント",
-        "docs/dev-environment.md": "開発環境セットアップガイド",
-        "docs/project-start.md": "プロジェクト開始ガイド",
+        "guardrails/docs/ci-cd.md": "CI/CD環境ドキュメント",
+        "guardrails/docs/dev-environment.md": "開発環境セットアップガイド",
+        "guardrails/docs/project-start.md": "プロジェクト開始ガイド",
     }
 
     print("\nドキュメントファイルをチェック中...")
+    for filename in config["optional_docs"]:
+        doc_files.setdefault(filename, "テンプレート利用側で定義された任意ドキュメント")
+
     for filename, description in doc_files.items():
         file_path = root_dir / filename
         if file_path.exists():
