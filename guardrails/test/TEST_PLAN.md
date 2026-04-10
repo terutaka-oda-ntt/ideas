@@ -7,6 +7,7 @@
 - ドキュメンテーションリポジトリ（Markdownファイル中心）
 - CI/CDおよび開発環境に関する情報を含む
 - pre-commitによる秘密検出フレームワークを導入
+- 他プロジェクトへガードレールを再利用できるテンプレートを目指す
 
 ## テスト目的
 
@@ -31,8 +32,8 @@
 
 | TC# | テスト項目 | 対象ファイル | 検証内容 | 期待結果 |
 |:---|:---|:---|:---|:---|
-| TC-05 | ファイル存在確認 | 重要ファイル | 必須ファイルが存在していることを確認 | ✓ すべて存在 |
-| TC-06 | セクションチェック | docs/ci-cd.md | 必要なセクションが存在することを確認 | ✓ セクション存在 |
+| TC-05 | ファイル存在確認 | 重要ファイル | `.guardrails-config.yaml` に基づく必須ファイルが存在していることを確認 | ✓ すべて存在 |
+| TC-06 | セクションチェック | guardrails/docs/ci-cd.md | 必要なセクションが存在することを確認 | ✓ セクション存在 |
 | TC-07 | リンク形式チェック | すべてのMarkdown | リンクが正しい形式であることを確認 | ✓ 形式正確 |
 
 ### テストカテゴリ3: セキュリティチェック
@@ -64,25 +65,25 @@
 ### 全テスト実行
 ```bash
 cd /workspaces/ideas
-./test/run_tests.sh
+./guardrails/test/run_tests.sh
 ```
 
 ### 個別テスト実行
 ```bash
 # ファイル構造チェック
-python3 test/test_structure.py
+python3 guardrails/test/test_structure.py
 
 # YAML形式チェック
-python3 test/test_yaml.py
+python3 guardrails/test/test_yaml.py
 
 # Markdownチェック
-python3 test/test_markdown.py
+python3 guardrails/test/test_markdown.py
 
 # セキュリティチェック（リポジトリの静的解析）
-python3 test/test_security.py
+python3 guardrails/test/test_security.py
 
 # pre-commitフック動作確認（TC-11～TC-19）
-python3 test/test_precommit_hooks.py
+python3 guardrails/test/test_precommit_hooks.py
 ```
 
 ## テスト実施スケジュール
@@ -91,6 +92,9 @@ python3 test/test_precommit_hooks.py
 - **コミット前**: 自動的にpre-commitフックが実行
 - **PR作成時（main/stage向け）**: GitHub Actions（`.github/workflows/ci.yml`）で全テスト実行
 - **main/stageへのpush時**: GitHub Actions（`.github/workflows/ci.yml`）で全テスト実行
+
+テンプレート利用先では `.guardrails-config.yaml` を更新し、構造テストの期待値をプロジェクト構成に合わせます。
+既存プロジェクトへ後付け導入する場合は `guardrails/docs/existing-project-bootstrap.md` の手順に従います。
 
 ## 合格基準
 

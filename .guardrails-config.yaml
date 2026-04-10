@@ -1,0 +1,9 @@
+required_files:
+  - .pre-commit-config.yaml
+  - .gitignore
+
+optional_docs:
+  - guardrails/docs/ci-cd.md
+  - guardrails/docs/dev-environment.md
+  - guardrails/docs/existing-project-bootstrap.md
+  - guardrails/docs/project-start.md

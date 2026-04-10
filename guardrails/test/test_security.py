@@ -8,7 +8,7 @@ from pathlib import Path
 
 def check_security():
     """セキュリティに関するチェック"""
-    root_dir = Path(__file__).parent.parent
+    root_dir = Path(__file__).resolve().parent.parent.parent
     errors = []
     passed = 0
 
@@ -47,14 +47,13 @@ def check_security():
     if gitignore_path.exists():
         try:
             gitignore_content = gitignore_path.read_text(encoding='utf-8')
-            required_excludes = [".baseline", "*.key", "*.pem"]
 
-            # .secrets.baseline が除外されているか確認
+            # .secrets.baseline は追跡対象として管理する
             if ".baseline" in gitignore_content or ".secrets.baseline" in gitignore_content:
-                passed += 1
-                print(f"✓ .gitignore: シークレットベースラインが除外されています")
+                errors.append("[TC-10] .gitignore: .secrets.baseline を除外しないでください")
             else:
-                print(f"⚠ .gitignore: .secrets.baseline が除外されていません")
+                passed += 1
+                print(f"✓ .gitignore: .secrets.baseline は追跡対象です")
         except Exception as e:
             errors.append(f"[TC-10] .gitignore: {str(e)}")
     else:

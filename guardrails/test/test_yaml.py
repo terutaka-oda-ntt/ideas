@@ -15,7 +15,7 @@ except ImportError:
 
 def check_yaml_files():
     """YAMLファイルの形式をチェック"""
-    root_dir = Path(__file__).parent.parent
+    root_dir = Path(__file__).resolve().parent.parent.parent
     yaml_files = list(root_dir.glob("*.yaml")) + list(root_dir.glob("*.yml"))
 
     errors = []

@@ -9,8 +9,8 @@ from pathlib import Path
 
 def check_markdown_files():
     """Markdownファイルの基本的な形式をチェック"""
-    root_dir = Path(__file__).parent.parent
-    markdown_files = list(root_dir.glob("*.md")) + list(root_dir.glob("docs/*.md"))
+    root_dir = Path(__file__).resolve().parent.parent.parent
+    markdown_files = list(root_dir.glob("*.md")) + list(root_dir.glob("guardrails/docs/*.md"))
 
     errors = []
     passed = 0

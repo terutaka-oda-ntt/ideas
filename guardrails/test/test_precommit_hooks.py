@@ -26,7 +26,7 @@ class PreCommitHookTester:
         self.passed_tests = []
         self.failed_tests = []
         self.original_dir = os.getcwd()
-        self.repo_root = Path(__file__).resolve().parent.parent
+        self.repo_root = Path(__file__).resolve().parent.parent.parent
 
     def setup(self):
         """テスト用の一時的なgitリポジトリを作成"""
