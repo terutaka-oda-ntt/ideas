@@ -28,10 +28,22 @@
 ### 1. 初回セットアップ
 
 ```bash
-pip install pre-commit
+# ガードレール用仮想環境を guardrails/.venv に作成する
+python3 -m venv guardrails/.venv
+source guardrails/.venv/bin/activate
+
+# 依存インストール
+pip install -r requirements-ci.txt
+
+# Git フック登録
 pre-commit install
+
+# detect-secrets baseline 初期化
 detect-secrets scan --baseline .secrets.baseline
 ```
+
+仮想環境は `guardrails/.venv` に作成します。
+これにより Pythonプロジェクトが `.venv` をルートに作成した場合でも衝突しません。
 
 `.secrets.baseline` は `.gitignore` に入れず、リポジトリで追跡します。
 
