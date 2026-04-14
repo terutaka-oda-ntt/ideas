@@ -90,8 +90,8 @@ python3 guardrails/test/test_precommit_hooks.py
 
 - **ローカル開発時**: `pre-commit run --all-files` で全チェック実行
 - **コミット前**: 自動的にpre-commitフックが実行
-- **PR作成時（main/stage向け）**: GitHub Actions（`.github/workflows/ci.yml`）で全テスト実行
-- **main/stageへのpush時**: GitHub Actions（`.github/workflows/ci.yml`）で全テスト実行
+- **PR作成時（main向け）**: GitHub Actions（`.github/workflows/ci.yml`）で `gitleaks-pr-scan` と全テスト実行
+- **mainへのpush時**: GitHub Actions（`.github/workflows/ci.yml`）で全テスト実行
 
 テンプレート利用先では `.guardrails-config.yaml` を更新し、構造テストの期待値をプロジェクト構成に合わせます。
 既存プロジェクトへ後付け導入する場合は `guardrails/docs/existing-project-bootstrap.md` の手順に従います。
@@ -110,6 +110,7 @@ python3 guardrails/test/test_precommit_hooks.py
   - pyyaml（YAML解析）
   - markdown（Markdown解析）
   - detect-secrets（秘密検出）
+  - gitleaks（CIのPR差分秘密検出）
 
 ## テスト記録
 

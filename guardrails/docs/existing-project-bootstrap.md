@@ -25,9 +25,11 @@
 - `.pre-commit-config.yaml`
 - `.secrets.baseline`
 - `.guardrails-config.yaml`
+- `.gitleaks.toml`
 - `requirements-ci.txt`
 - `.github/workflows/ci.yml`
 - `guardrails/scripts/apply_branch_protection.sh`
+- `guardrails/scripts/apply_org_branch_protection.sh`
 - `guardrails/test/`
 
 `README.md` や既存の `docs/` は上書きせず、必要な説明だけ追加します。
@@ -74,9 +76,11 @@ mkdir -p .github/workflows guardrails/scripts guardrails/test
 cp "$TEMPLATE_DIR/.pre-commit-config.yaml" .
 cp "$TEMPLATE_DIR/.secrets.baseline" .
 cp "$TEMPLATE_DIR/.guardrails-config.yaml" .
+cp "$TEMPLATE_DIR/.gitleaks.toml" .
 cp "$TEMPLATE_DIR/requirements-ci.txt" .
 cp "$TEMPLATE_DIR/.github/workflows/ci.yml" .github/workflows/ci.yml
 cp "$TEMPLATE_DIR/guardrails/scripts/apply_branch_protection.sh" guardrails/scripts/apply_branch_protection.sh
+cp "$TEMPLATE_DIR/guardrails/scripts/apply_org_branch_protection.sh" guardrails/scripts/apply_org_branch_protection.sh
 cp -r "$TEMPLATE_DIR/guardrails/test/." guardrails/test/
 ```
 
@@ -103,12 +107,13 @@ optional_docs:
 
 ### 4. CI の実行条件を対象プロジェクトへ合わせる
 
-`.github/workflows/ci.yml` の既定では、次の 2 点が固定です。
+`.github/workflows/ci.yml` の既定では、次の 3 点が固定です。
 
-- 対象ブランチは `main` と `stage`
-- 実行コマンドは `pre-commit run --all-files` と `./guardrails/test/run_tests.sh`
+- 対象ブランチは `main`
+- `quality-and-security` ジョブで `pre-commit run --all-files` と `./guardrails/test/run_tests.sh` を実行
+- `gitleaks-pr-scan` ジョブで PR 差分を検査
 
-既存プロジェクトで `stage` が存在しない場合は、対象ブランチを `main` のみに変更してください。
+`stage` を保護対象にしたい場合は、`.github/workflows/ci.yml` の対象ブランチへ明示的に追加してください。
 
 既存の CI がある場合は、次のどちらかに寄せるのが安全です。
 
@@ -155,19 +160,30 @@ PR に含める内容は、原則として次に限定します。
 
 ```bash
 export GH_TOKEN=<repo admin token>
-export REQUIRED_CONTEXTS="quality-and-security"
-export PROTECTED_BRANCHES="main"
-./guardrails/scripts/apply_branch_protection.sh
+./guardrails/scripts/apply_org_branch_protection.sh
 ```
 
-`stage` や `release` を守る場合は `PROTECTED_BRANCHES` に追加します。
+`quality-and-security` も必須にする場合:
+
+```bash
+export GH_TOKEN=<repo admin token>
+./guardrails/scripts/apply_org_branch_protection.sh --profile full-guardrails
+```
+
+`stage` や `release` を守る場合:
+
+```bash
+export GH_TOKEN=<repo admin token>
+./guardrails/scripts/apply_org_branch_protection.sh --branches main,stage,release
+```
 
 ## 初回導入で確認する項目
 
 - `pre-commit run --all-files` が通る
 - `./guardrails/test/run_tests.sh` が通る
-- GitHub Actions の guardrails ジョブが通る
+- GitHub Actions の `quality-and-security` と `gitleaks-pr-scan` が通る
 - `.secrets.baseline` の差分がレビュー済みである
+- `.gitleaks.toml` の allowlist 変更が理由付きでレビューされている
 - branch protection の必須チェック名が実際の job 名と一致している
 
 ## よくある調整ポイント
@@ -176,9 +192,10 @@ export PROTECTED_BRANCHES="main"
 
 このテンプレートの `guardrails/test/` はガードレール検証用です。既存のアプリケーションテストとは分けて扱って構いません。
 
-### `stage` ブランチがない
+### `stage` ブランチも保護したい
 
-`.github/workflows/ci.yml` の対象ブランチと `PROTECTED_BRANCHES` を `main` に寄せてください。
+標準は `main` のみです。`stage` を追加する場合は、`.github/workflows/ci.yml` の対象ブランチと
+`./guardrails/scripts/apply_org_branch_protection.sh --branches` を同時に更新してください。
 
 ### Python を普段使わないプロジェクトで導入したい
 

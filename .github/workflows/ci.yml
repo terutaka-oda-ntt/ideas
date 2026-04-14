@@ -4,16 +4,66 @@ on:
   pull_request:
     branches:
       - main
-      - stage
   push:
     branches:
       - main
-      - stage
 
 permissions:
   contents: read
 
 jobs:
+  gitleaks-pr-scan:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install gitleaks
+        env:
+          GITLEAKS_VERSION: '8.24.2'
+        run: |
+          curl -sSL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" -o /tmp/gitleaks.tar.gz
+          tar -xzf /tmp/gitleaks.tar.gz -C /tmp
+          mkdir -p "$HOME/.local/bin"
+          mv /tmp/gitleaks "$HOME/.local/bin/gitleaks"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Scan PR diff with gitleaks
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set +e
+          config_args=()
+          if [[ -f .gitleaks.toml ]]; then
+            config_args+=(--config .gitleaks.toml)
+          fi
+          gitleaks detect \
+            --no-banner \
+            --redact \
+            --source . \
+            "${config_args[@]}" \
+            --log-opts "${BASE_SHA}..${HEAD_SHA}" \
+            --report-format json \
+            --report-path gitleaks-report.json
+          exit_code=$?
+          set -e
+          echo "gitleaks exit code: ${exit_code}"
+          exit ${exit_code}
+
+      - name: Upload gitleaks report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gitleaks-report
+          path: gitleaks-report.json
+          retention-days: 30
+
   quality-and-security:
     runs-on: ubuntu-latest
     timeout-minutes: 20

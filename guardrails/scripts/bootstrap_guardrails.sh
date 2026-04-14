@@ -97,6 +97,7 @@ required_template_files=(
   "requirements-ci.txt"
   ".github/workflows/ci.yml"
   "guardrails/scripts/apply_branch_protection.sh"
+  "guardrails/scripts/apply_org_branch_protection.sh"
   "guardrails/test/run_tests.sh"
 )
 
@@ -162,6 +163,7 @@ copy_file ".guardrails-config.yaml"
 copy_file "requirements-ci.txt"
 copy_file ".github/workflows/ci.yml"
 copy_file "guardrails/scripts/apply_branch_protection.sh"
+copy_file "guardrails/scripts/apply_org_branch_protection.sh"
 
 # Also copy this bootstrap script for future updates if available.
 if [[ -f "$TEMPLATE_DIR/guardrails/scripts/bootstrap_guardrails.sh" ]]; then
@@ -183,6 +185,9 @@ if [[ -f "$TARGET_DIR/guardrails/scripts/apply_branch_protection.sh" ]]; then
 fi
 if [[ -f "$TARGET_DIR/guardrails/scripts/bootstrap_guardrails.sh" ]]; then
   run_cmd chmod +x "$TARGET_DIR/guardrails/scripts/bootstrap_guardrails.sh"
+fi
+if [[ -f "$TARGET_DIR/guardrails/scripts/apply_org_branch_protection.sh" ]]; then
+  run_cmd chmod +x "$TARGET_DIR/guardrails/scripts/apply_org_branch_protection.sh"
 fi
 if [[ -f "$TARGET_DIR/guardrails/test/run_tests.sh" ]]; then
   run_cmd chmod +x "$TARGET_DIR/guardrails/test/run_tests.sh"

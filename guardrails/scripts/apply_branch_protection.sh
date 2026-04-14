@@ -3,8 +3,25 @@
 
 set -euo pipefail
 
-REQUIRED_CONTEXTS="${REQUIRED_CONTEXTS:-quality-and-security}"
-PROTECTED_BRANCHES="${PROTECTED_BRANCHES:-main,stage}"
+CHECK_PROFILE="${CHECK_PROFILE:-security-only}"
+REQUIRED_CONTEXTS="${REQUIRED_CONTEXTS:-}"
+PROTECTED_BRANCHES="${PROTECTED_BRANCHES:-main}"
+REQUIRED_APPROVING_REVIEW_COUNT="${REQUIRED_APPROVING_REVIEW_COUNT:-0}"
+
+if [[ -z "${REQUIRED_CONTEXTS}" ]]; then
+  case "${CHECK_PROFILE}" in
+    security-only)
+      REQUIRED_CONTEXTS="gitleaks-pr-scan"
+      ;;
+    full-guardrails)
+      REQUIRED_CONTEXTS="gitleaks-pr-scan,quality-and-security"
+      ;;
+    *)
+      echo "Set CHECK_PROFILE to 'security-only' or 'full-guardrails', or set REQUIRED_CONTEXTS explicitly." >&2
+      exit 1
+      ;;
+  esac
+fi
 
 if ! command -v gh >/dev/null 2>&1; then
   echo "gh CLI is required." >&2
@@ -43,6 +60,11 @@ if [[ ${#CONTEXTS[@]} -eq 0 || -z "${CONTEXTS[0]}" ]]; then
   exit 1
 fi
 
+if [[ ! "${REQUIRED_APPROVING_REVIEW_COUNT}" =~ ^[0-9]+$ ]]; then
+  echo "Set REQUIRED_APPROVING_REVIEW_COUNT to a non-negative integer." >&2
+  exit 1
+fi
+
 CONTEXTS_JSON="$(printf '%s\n' "${CONTEXTS[@]}" | sed '/^$/d' | sed 's/^/    "/; s/$/"/' | paste -sd ',\n' -)"
 
 for BRANCH in "${BRANCHES[@]}"; do
@@ -64,7 +86,7 @@ ${CONTEXTS_JSON}
   },
   "enforce_admins": true,
   "required_pull_request_reviews": {
-    "required_approving_review_count": 0,
+    "required_approving_review_count": ${REQUIRED_APPROVING_REVIEW_COUNT},
     "dismiss_stale_reviews": true,
     "require_code_owner_reviews": false,
     "require_last_push_approval": false
@@ -83,4 +105,4 @@ JSON
   gh api "repos/${OWNER}/${REPO}/branches/${BRANCH}" --jq '"- " + .name + " protected=" + (.protected|tostring)'
 done
 
-echo "Done. Confirm in GitHub settings: required status checks '${REQUIRED_CONTEXTS}'."
+echo "Done. Confirm in GitHub settings: required status checks '${REQUIRED_CONTEXTS}', required approving reviews '${REQUIRED_APPROVING_REVIEW_COUNT}'."

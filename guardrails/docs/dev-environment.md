@@ -2,6 +2,9 @@
 
 このリポジトリではpre-commitフレームワークを導入し、シークレットなどの機密情報がコミットされるのを防いでいます。
 
+このドキュメントはローカル開発（pre-commit / detect-secrets）を対象にしています。
+CI 側の `gitleaks-pr-scan` 運用は `guardrails/docs/ci-cd.md` を参照してください。
+
 ## インストール済みのツール
 
 | ツール | 役割 |
