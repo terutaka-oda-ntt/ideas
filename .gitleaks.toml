@@ -1,0 +1,18 @@
+# Organization-managed gitleaks configuration.
+# This file is intentionally minimal and is auto-detected by CI.
+#
+# Operational policy:
+# - Allowlist only confirmed dummy/test data.
+# - Never allowlist real secrets.
+# - Each allowlist change must include rationale in PR description.
+
+title = "ideas-gitleaks-config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Project allowlist for false positives"
+paths = []
+regexes = []
+commits = []
